@@ -1,0 +1,10 @@
+# 프로젝트 제외 경로
+/backend/.gradle/
+/backend/build/
+/backend/build/classes/java/main/
+/backend/build/classes/java/test/
+/frontend/node_modules/
+/frontend-react/node_modules/
+/backend/java-runtime/
+/.idea
+.vscode/settings.json

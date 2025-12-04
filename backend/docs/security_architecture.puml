@@ -1,0 +1,71 @@
+@startuml
+title Spring Security Filter Chain Architecture
+
+actor Client
+participant "DecryptionFilter" as DecryptFilter
+participant "GenerateTokenForUserFilter\n(Login)" as LoginFilter
+participant "JwtAuthenticationFilter" as JwtFilter
+participant "UsernamePasswordAuthenticationFilter" as UPAF
+participant "Controller" as Controller
+
+note over DecryptFilter
+  <b>Priority 1</b>
+  Handles encrypted requests
+  (RSA-OAEP + AES-GCM)
+end note
+
+note over LoginFilter
+  <b>Priority 2</b>
+  Handles /api/auth/login
+  Generates JWT on success
+end note
+
+note over JwtFilter
+  <b>Priority 3</b>
+  Validates JWT Access Token
+  Sets SecurityContext
+end note
+
+Client -> DecryptFilter: HTTP Request\n(Maybe Encrypted)
+
+activate DecryptFilter
+  alt is Encrypted Request?
+    DecryptFilter -> DecryptFilter: 1. Decrypt AES Key (RSA)\n2. Decrypt Data (AES-GCM)
+    DecryptFilter -> DecryptFilter: Wrap Request with Decrypted Content
+  end
+  
+  DecryptFilter -> LoginFilter: doFilter(request, response)
+  activate LoginFilter
+    
+    alt is Login Request (/api/auth/login)?
+      LoginFilter -> LoginFilter: Attempt Authentication
+      alt Authentication Success
+        LoginFilter -> Client: 200 OK + JWT Token
+        note right: Stops chain here
+      else Authentication Failure
+        LoginFilter -> Client: 401 Unauthorized
+      end
+    else Not Login Request
+      LoginFilter -> JwtFilter: doFilter(request, response)
+      activate JwtFilter
+      
+        alt has Valid JWT Token?
+          JwtFilter -> JwtFilter: Validate Token
+          JwtFilter -> JwtFilter: SecurityContextHolder.setAuthentication()
+        end
+        
+        JwtFilter -> UPAF: doFilter(request, response)
+        activate UPAF
+          UPAF -> Controller: Process Request
+          activate Controller
+            Controller -> Client: HTTP Response
+          deactivate Controller
+        deactivate UPAF
+        
+      deactivate JwtFilter
+    end
+    
+  deactivate LoginFilter
+deactivate DecryptFilter
+
+@enduml

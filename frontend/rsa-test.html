@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>RSA 암호화 테스트</title>
+</head>
+
+<body>
+    <h1>RSA-OAEP/SHA-256 테스트</h1>
+    <button onclick="testEncryption()">테스트 실행</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testEncryption() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = '테스트 중...\n';
+
+            try {
+                // 1. 공개키 가져오기
+                const pubKeyResponse = await fetch('http://localhost:8080/api/crypto/public-key');
+                const pubKeyData = await pubKeyResponse.json();
+                const publicKeyBase64 = pubKeyData.publicKey;
+
+                resultEl.textContent += `✅ 공개키 가져오기 성공\n`;
+                resultEl.textContent += `   길이: ${publicKeyBase64.length}\n\n`;
+
+                // 2. 공개키 임포트
+                const binaryDer = Uint8Array.from(atob(publicKeyBase64), c => c.charCodeAt(0));
+                const publicKey = await crypto.subtle.importKey(
+                    'spki',
+                    binaryDer,
+                    {
+                        name: 'RSA-OAEP',
+                        hash: 'SHA-256'
+                    },
+                    false,
+                    ['encrypt']
+                );
+
+                resultEl.textContent += `✅ 공개키 임포트 성공\n`;
+                resultEl.textContent += `   알고리즘: RSA-OAEP\n`;
+                resultEl.textContent += `   해시: SHA-256\n\n`;
+
+                // 3. 테스트 데이터 암호화
+                const testData = "HelloWorld1234567890123456789012"; // 32 bytes
+                const encoder = new TextEncoder();
+                const dataBytes = encoder.encode(testData);
+
+                resultEl.textContent += `📝 테스트 데이터: "${testData}"\n`;
+                resultEl.textContent += `   길이: ${dataBytes.length} bytes\n\n`;
+
+                // 4. RSA-OAEP로 암호화
+                const encryptedData = await crypto.subtle.encrypt(
+                    { name: 'RSA-OAEP' },
+                    publicKey,
+                    dataBytes
+                );
+
+                const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedData)));
+
+                resultEl.textContent += `✅ RSA-OAEP 암호화 성공\n`;
+                resultEl.textContent += `   암호화된 데이터 길이: ${encryptedBase64.length}\n\n`;
+
+                // 5. 서버로 복호화 요청
+                const decryptResponse = await fetch('http://localhost:8080/api/crypto/test-decrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        encryptedKey: encryptedBase64
+                    })
+                });
+
+                const decryptResult = await decryptResponse.json();
+
+                if (decryptResult.success) {
+                    resultEl.textContent += `✅ 서버 복호화 성공!\n`;
+                    resultEl.textContent += `   복호화된 데이터: "${decryptResult.decryptedKey}"\n`;
+                    resultEl.textContent += `   원본과 일치: ${decryptResult.decryptedKey === testData ? '✅ YES' : '❌ NO'}\n`;
+                } else {
+                    resultEl.textContent += `❌ 서버 복호화 실패\n`;
+                    resultEl.textContent += `   에러: ${decryptResult.error}\n`;
+                    resultEl.textContent += `   타입: ${decryptResult.type}\n`;
+                }
+
+            } catch (error) {
+                resultEl.textContent += `\n❌ 에러 발생: ${error.message}\n`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+
+</html>
