@@ -29,7 +29,11 @@ const handleSignup = async () => {
     const encryptedPayload = await encryptionService.encryptData(signupData)
     
     // 암호화된 데이터로 API 호출
-    await axios.post('/api/auth/signup', encryptedPayload)
+    await axios.post('/api/auth/signup', encryptedPayload, {
+      headers: {
+        'X-Encrypted-Body': 'true'
+      }
+    })
     
     // 성공 알림
     alert('✅ 회원가입이 완료되었습니다!')

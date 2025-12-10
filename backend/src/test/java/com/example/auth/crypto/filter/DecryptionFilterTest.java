@@ -48,6 +48,7 @@ class DecryptionFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setMethod("POST");
         request.setContentType("application/json");
+        request.addHeader("X-Encrypted-Body", "true");
         request.setContent(encryptedBody.getBytes(StandardCharsets.UTF_8));
 
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -82,17 +83,17 @@ class DecryptionFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setMethod("POST");
         request.setContentType("application/json");
+        // Header not set
         request.setContent(normalBody.getBytes(StandardCharsets.UTF_8));
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        // EncryptedRequestDto로 파싱은 시도하지만, 필드가 null임
-        when(objectMapper.readValue(any(byte[].class), eq(EncryptedRequestDto.class)))
-                .thenReturn(new EncryptedRequestDto());
-
         // when
         decryptionFilter.doFilter(request, response, filterChain);
 
+        // then
+        // Header가 없으므로 파싱 시도조차 하지 않아야 함
+        verify(objectMapper, never()).readValue(any(byte[].class), eq(EncryptedRequestDto.class));
         // then
         verify(cryptoUtils, never()).decryptAesKey(anyString(), anyString());
         verify(filterChain).doFilter(any(HttpServletRequest.class), eq(response));
