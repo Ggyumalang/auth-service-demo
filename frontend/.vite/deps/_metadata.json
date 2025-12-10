@@ -1,8 +1,25 @@
 {
-  "hash": "dd8962f2",
+  "hash": "4a16b26e",
   "configHash": "86f3027a",
-  "lockfileHash": "e3b0c442",
-  "browserHash": "b6544567",
-  "optimized": {},
-  "chunks": {}
+  "lockfileHash": "4ae7e915",
+  "browserHash": "ba2cb91d",
+  "optimized": {
+    "vue": {
+      "src": "../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "5b1882e7",
+      "needsInterop": false
+    },
+    "vue-router": {
+      "src": "../../node_modules/vue-router/dist/vue-router.mjs",
+      "file": "vue-router.js",
+      "fileHash": "e93305e2",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-RFOV76A4": {
+      "file": "chunk-RFOV76A4.js"
+    }
+  }
 }

@@ -4,6 +4,7 @@
 /backend/build/classes/java/main/
 /backend/build/classes/java/test/
 /frontend/node_modules/
+/frontend/.vite/
 /frontend-react/node_modules/
 /backend/java-runtime/
 /.idea
