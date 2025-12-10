@@ -29,9 +29,11 @@ end note
 Client -> DecryptFilter: HTTP Request\n(Maybe Encrypted)
 
 activate DecryptFilter
-  alt is Encrypted Request?
+  alt Header "X-Encrypted-Body" is "true"?
     DecryptFilter -> DecryptFilter: 1. Decrypt AES Key (RSA)\n2. Decrypt Data (AES-GCM)
     DecryptFilter -> DecryptFilter: Wrap Request with Decrypted Content
+  else Header missing or false
+    DecryptFilter -> DecryptFilter: Pass through (No Decryption)
   end
   
   DecryptFilter -> LoginFilter: doFilter(request, response)
@@ -43,7 +45,7 @@ activate DecryptFilter
         LoginFilter -> Client: 200 OK + JWT Token
         note right: Stops chain here
       else Authentication Failure
-        LoginFilter -> Client: 401 Unauthorized
+        LoginFilter -> Client: 401 Unauthorized (CustomEntryPoint)
       end
     else Not Login Request
       LoginFilter -> JwtFilter: doFilter(request, response)

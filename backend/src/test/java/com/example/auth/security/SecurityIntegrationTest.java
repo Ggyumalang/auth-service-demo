@@ -52,8 +52,8 @@ public class SecurityIntegrationTest {
         loginRequest.put("password", "password123");
 
         mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").exists())
                 .andExpect(jsonPath("$.tokenType").value("Bearer"));
@@ -66,18 +66,19 @@ public class SecurityIntegrationTest {
         loginRequest.put("password", "wrongpassword");
 
         mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false));
     }
 
     @Test
     void accessProtectedEndpoint_WithoutToken_Fail() throws Exception {
-        // Assuming there is a protected endpoint. If not, we can try to access a non-existent one which should still be 403/401 if secured
+        // Assuming there is a protected endpoint. If not, we can try to access a
+        // non-existent one which should still be 403/401 if secured
         // But let's try to access a known secured path if we had one.
-        // For now, let's try to access a made-up protected path, which should be 403 Forbidden or 401 Unauthorized
-        mockMvc.perform(get("/api/user/me"))
-                .andExpect(status().isForbidden()); // Or isUnauthorized depending on config
+        // Try to access a known secured path
+        mockMvc.perform(get("/api/user"))
+                .andExpect(status().isUnauthorized());
     }
 }

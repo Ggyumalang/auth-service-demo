@@ -82,7 +82,8 @@ class CryptoUtilsTest {
         String encryptedDataBase64 = Base64.getEncoder().encodeToString(combined);
 
         // 3. 복호화 테스트
-        String decryptedData = cryptoUtils.decryptData(encryptedDataBase64, aesKey);
+        String aesKeyBase64 = Base64.getEncoder().encodeToString(aesKey.getBytes());
+        String decryptedData = cryptoUtils.decryptData(encryptedDataBase64, aesKeyBase64);
 
         // 4. 검증
         assertThat(decryptedData).isEqualTo(originalData);

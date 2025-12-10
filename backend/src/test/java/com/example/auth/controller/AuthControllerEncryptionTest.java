@@ -94,7 +94,10 @@ class AuthControllerEncryptionTest {
 
         Cipher rsaCipher = Cipher.getInstance("RSA/ECB/OAEPPadding");
         rsaCipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic(), oaepParams);
-        byte[] encryptedKeyBytes = rsaCipher.doFinal(aesKey.getBytes());
+
+        // Frontend sends Base64 encoded AES key, encrypted with RSA
+        String aesKeyBase64 = Base64.getEncoder().encodeToString(aesKey.getBytes());
+        byte[] encryptedKeyBytes = rsaCipher.doFinal(aesKeyBase64.getBytes());
         String encryptedKey = Base64.getEncoder().encodeToString(encryptedKeyBytes);
 
         // 4. 요청 DTO 생성
@@ -103,6 +106,7 @@ class AuthControllerEncryptionTest {
         // 5. 요청 전송
         mockMvc.perform(post("/api/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Encrypted-Body", "true")
                 .content(objectMapper.writeValueAsString(encryptedRequest)))
                 .andExpect(status().isOk());
 

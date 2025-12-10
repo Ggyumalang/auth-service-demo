@@ -94,8 +94,15 @@ public class DecryptionFilter extends OncePerRequestFilter {
     private boolean isEncryptedRequest(HttpServletRequest request) {
         String method = request.getMethod();
         String contentType = request.getContentType();
+        String encryptedHeader = request.getHeader("X-Encrypted-Body");
+
+        if (method == null) {
+            return false;
+        }
+
         return (HttpMethod.POST.matches(method) || HttpMethod.PUT.matches(method)) &&
-                contentType != null && contentType.contains(MediaType.APPLICATION_JSON_VALUE);
+                contentType != null && contentType.contains(MediaType.APPLICATION_JSON_VALUE) &&
+                "true".equalsIgnoreCase(encryptedHeader);
     }
 
     private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode, String detailMessage)
