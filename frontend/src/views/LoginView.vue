@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import axios from '@/api/axios'
 import { useRouter } from 'vue-router'
+import { OAUTH_DOMAIN } from '@/config/domains'
 
 const router = useRouter()
 const username = ref('')
@@ -27,11 +28,11 @@ const handleLogin = async () => {
 }
 
 const loginWithKakao = () => {
-  window.location.href = 'http://localhost:8080/oauth2/authorization/kakao'
+  window.location.href = OAUTH_DOMAIN.KAKAO_AUTH_URL
 }
 
 const loginWithNaver = () => {
-  window.location.href = 'http://localhost:8080/oauth2/authorization/naver'
+  window.location.href = OAUTH_DOMAIN.NAVER_AUTH_URL
 }
 </script>
 

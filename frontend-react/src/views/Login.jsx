@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from '../api/axios';
+import axios from '../shared/api/axios';
+import { OAUTH_DOMAIN } from '../shared/config/domains';
 import './Login.css';
 
 const Login = () => {
@@ -28,11 +29,11 @@ const Login = () => {
     };
 
     const loginWithKakao = () => {
-        window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
+        window.location.href = OAUTH_DOMAIN.KAKAO_AUTH_URL;
     };
 
     const loginWithNaver = () => {
-        window.location.href = 'http://localhost:8080/oauth2/authorization/naver';
+        window.location.href = OAUTH_DOMAIN.NAVER_AUTH_URL;
     };
 
     return (
